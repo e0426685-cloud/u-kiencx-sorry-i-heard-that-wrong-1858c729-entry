@@ -2,8 +2,10 @@
 
 Running this script produces the competition entry: a joke apology from a
 voice assistant that misheard a request for chill music as an order for a
-chinchilla. It saves that single line of text to entry.txt (and to
-/output/entry.txt when that directory exists), ready for submission.
+chinchilla. It saves that single line of text to entry.txt in the grader
+output directory only (MAKEFUN_OUTPUT_DIR when set, otherwise /output),
+creating that directory if needed. The repository directory is never
+written to, so the program also runs when the repo is mounted read-only.
 Only the Python standard library is used.
 """
 
@@ -22,12 +24,12 @@ def main():
         raise ValueError("entry must fit on a single line")
     if len(line) > MAX_CHARS:
         raise ValueError(f"entry is {len(line)} chars, over the {MAX_CHARS} limit")
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
+    output_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, "entry.txt")
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write(line)
-    os.chmod("/output/entry.txt", 0o644)
-    with open("entry.txt", "w", encoding="utf-8") as f:
-        f.write(line)
-    os.chmod("entry.txt", 0o644)
+    os.chmod(out_path, 0o644)
 
 
 if __name__ == "__main__":
